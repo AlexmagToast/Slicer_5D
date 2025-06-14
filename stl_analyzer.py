@@ -401,6 +401,76 @@ def merge_gcode_files(gcode_files: List[str], output_file: str):
     except Exception as e:
         print(f"Error merging G-code files: {str(e)}")
 
+
+def modifyConfigIni(url, instances = 1):
+    """
+    Loads an INI file from the given URL, parses it line by line,
+    and saves the modified version to a new file.
+    
+    Args:
+        url (str): Path to the input INI file
+        
+    Returns:
+        str: Path to the modified INI file
+    """
+    # Generate output filename by adding '_modified' before the extension
+    base_name = url.rsplit('.', 1)[0]
+    output_url = f"{base_name}_modified.ini"
+    
+    try:
+        # Read the input file
+        with open(url, 'r') as file:
+            lines = file.readlines()
+        
+        # Process each line
+        modified_lines = []
+        for line in lines:
+            # Remove leading/trailing whitespace
+            line = line.strip()
+            
+            # Skip empty lines
+            if not line:
+                modified_lines.append('\n')
+                continue
+                
+            # Skip comments
+            if line.startswith(';') or line.startswith('#'):
+                modified_lines.append(line + '\n')
+                continue
+                
+            # Process the line based on its content
+            # This is where you can add your switch case logic later
+            if '=' in line:
+                key, value = line.split('=', 1)
+                key = key.strip()
+                value = value.strip()
+                
+                switch(key):
+                    case "some_key":
+                        value = "new_value"
+                        break
+            
+                #     case "another_key":
+                #         value = "another_value"
+                
+                modified_lines.append(f"{key} = {value}\n")
+            else:
+                # Keep other lines as is
+                modified_lines.append(line + '\n')
+        
+        # Write the modified content to the new file
+        with open(output_url, 'w') as file:
+            file.writelines(modified_lines)
+            
+        return output_url
+        
+    except FileNotFoundError:
+        print(f"Error: Could not find the file {url}")
+        return None
+    except Exception as e:
+        print(f"Error processing file: {str(e)}")
+        return None
+
 if __name__ == "__main__":
     # Get the directory where this script is located
     script_dir = Path(__file__).parent.absolute()
